@@ -49,7 +49,7 @@ angular.module('SQT', [
 
     $q.all({tests: $localForage.getItem('tests'), config: $localForage.getItem('config')})
         .then(function (data) {
-            if (data !== null && data.hasOwnProperty('config') && data.hasOwnProperty('tests')) {
+            if (data !== null && data.config !== null && data.tests !== null) {
                 return data;
             }
             return $http.get('tests.yml').then(loadYaml);
