@@ -16,7 +16,7 @@ angular.module('SQT', [
             });
         }
     }
-}).controller('MainCtrl', function ($scope, $q, $http, $log, testService, $localForage) {
+}).controller('MainCtrl', function ($scope, $q, $http, testService, $localForage) {
     $scope.$on('newConfig',function(event,data){
         $scope.running = true;
         $q.when({data:data}).then(loadYaml).then(runTests).then(function () {
@@ -50,7 +50,7 @@ angular.module('SQT', [
     $q.all({tests: $localForage.getItem('tests'), config: $localForage.getItem('config')})
         .then(function (data) {
             if (data !== null && data.config !== null && data.tests !== null) {
-                return data;
+                return $http.get('tests.yml').then(loadYaml);
             }
             return $http.get('tests.yml').then(loadYaml);
         }).then(runTests).then(function () {
@@ -77,10 +77,6 @@ angular.module('SQT', [
 
     $scope.$watch('tests', function (nv) {
         if (_.isArray(nv)) {
-            $localForage.setItem('tests', angular.copy(nv)).then(function () {
-                $log.warn("saved")
-            });
-            $log.warn(nv);
             var running = _.filter(nv, {running: true}).length;
             var success = _.filter(nv, {running: false, success: true}).length;
             var failure = _.filter(nv, {running: false, success: false}).length;
@@ -91,12 +87,11 @@ angular.module('SQT', [
                     {value: success * 100 / total, amount: success, total: total, type: 'success', text: 'successful'},
                     {value: failure * 100 / total, amount: failure, total: total, type: 'danger', text: 'failed'}
                 ];
-                $log.warn($scope.testRatios);
             }
         }
     }, true);
 
-}).factory('testService', function ($q, $log) {
+}).factory('testService', function ($q,$log) {
     _.mixin(_.str.exports());
 
     var factory = {};
@@ -134,6 +129,12 @@ angular.module('SQT', [
                     }
                 });
                 return _.merge(test, results);
+            }).catch(function (){
+                return _.merge(test,{
+                    $queryResults: 'none',
+                    $testResults: {connectToServer : {success: false, message: 'Could Not Connect to ' + test.config.url}},
+                    success: false
+                })
             })
     };
 

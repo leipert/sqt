@@ -1,18 +1,18 @@
 config:
-  url: https://ssl.leipert.io/sparql
+  url: //ssl.leipert.io/sparql
   graph: http://example.org/
   timeout: 5000
 tests:
-- config:
-     graph: http://gsb.leipert.io/ns/
-  title: isNotEmpty
+- title: isNotEmpty
   query: |
      Select ?s ?p ?o {
        ?s ?p ?o
      } LIMIT 10
   expect:
      isNotEmpty:
-     nonExistent: lalalaa
+     nonExistentTest: lalalaa
+  config:
+     graph: http://gsb.leipert.io/ns/
 - title: isEmpty
   query: |
      Select ?s {
@@ -21,8 +21,6 @@ tests:
   expect:
      isEmpty:
 - title: A failing test
-  config:
-     graph: ''
   query: |
      Select ?s ?p ?o {
        ?s ?p ?o
@@ -30,3 +28,15 @@ tests:
   expect:
      isNotEmpty:
      isEmpty:
+  config:
+     graph: ''
+- title: A failing url
+  query: |
+     Select ?s ?p ?o {
+       ?s ?p ?o
+     } LIMIT 10
+  expect:
+     isNotEmpty:
+     isEmpty:
+  config:
+     url: //example.org/sparql
