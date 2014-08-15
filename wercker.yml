@@ -7,6 +7,9 @@ build:
 
 deploy:
   steps:
+    - script:
+        name: Removing .gitignore
+        code: rm .gitignore
     - lukevivier/gh-pages:
         token: $GH_TOKEN
         basedir: .
