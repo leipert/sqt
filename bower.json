@@ -1,0 +1,17 @@
+{
+  "name": "SQT",
+  "version": "0.0.1",
+  "main": ".",
+  "dependencies": {
+    "angular": "1.2.15",
+    "bootstrap": "~3.1.1",
+    "angular-bootstrap": "~0.11.0",
+    "angular-sanitize": "1.2.15",
+    "jassa": "leipert/Jassa-Bower#0.0.5",
+    "angular-localforage": "~0.2.9",
+    "js-yaml": "~3.1.0"
+  },
+  "resolutions": {
+    "angular": "1.2.15"
+  }
+}

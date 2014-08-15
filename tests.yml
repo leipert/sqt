@@ -1,0 +1,32 @@
+config:
+  url: https://ssl.leipert.io/sparql
+  graph: http://example.org/
+  timeout: 5000
+tests:
+- config:
+     graph: http://gsb.leipert.io/ns/
+  title: isNotEmpty
+  query: |
+     Select ?s ?p ?o {
+       ?s ?p ?o
+     } LIMIT 10
+  expect:
+     isNotEmpty:
+     nonExistent: lalalaa
+- title: isEmpty
+  query: |
+     Select ?s {
+       ?s a rdfs:nonsense
+     } LIMIT 10
+  expect:
+     isEmpty:
+- title: A failing test
+  config:
+     graph: ''
+  query: |
+     Select ?s ?p ?o {
+       ?s ?p ?o
+     } LIMIT 10
+  expect:
+     isNotEmpty:
+     isEmpty:

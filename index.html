@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en" ng-app="SQT">
+<head>
+    <meta charset="utf-8">
+    <title>SQT: Prototyp</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="app.css">
+</head>
+
+<body ng-controller="MainCtrl">
+<div class="container">
+
+    <div ng-if="tests">
+        <h2 class="h3">Test Results</h2>
+        <div class="row">
+            <form class="form-inline" role="form">
+                <div class="form-group col-xs-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Search Tests" ng-model="$search.$">
+                    </div>
+                </div>
+                <div class="form-group col-xs-2">
+                    <button type="button" class="btn btn-sm btn-default" ng-click="$search.success = undefined" ng-show="$search.success">Show All</button>
+                    <button type="button" class="btn btn-sm btn-default" ng-click="$search.success = false" ng-show="$search.success === undefined">Show only Failed</button>
+                    <button type="button" class="btn btn-sm btn-default" ng-click="$search.success = true" ng-show="$search.success === false">Show only Successful</button>
+                </div>
+                <div class="form-group pull-right col-xs-5">
+                    <div class="input-group input-group-sm ">
+                        <span class="input-group-addon"><i class="fa fa-upload"></i> Upload config.yml</span>
+                        <input class="form-control" id="configFile" type="file" fileread/>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <br>
+        <div>
+            <progress>
+                <bar ng-repeat="bar in testRatios" value="bar.value" type="{{bar.type}}">
+                    <span ng-hide="bar.value < 5"><b>{{bar.amount}} of {{bar.total}} tests {{bar.text}} ({{bar.value | number:0}}%)</b></span>
+                </bar>
+            </progress>
+        </div>
+        <div class="row">
+
+            <accordion close-others="true" class="col-xs-12">
+                <accordion-group heading="{{test.title}}"
+                                 ng-repeat="(key, test) in tests | filter:$search"
+                                 ng-class="getStatusClass(test)"
+                                 is-open="test.$open"
+                                 is-disabled="test.running"
+                        >
+                    <accordion-heading>
+                    <span ng-if="!test.running">
+                        <i ng-if="test.success" class="fa fa-fw fa-check-square-o text-success"></i>
+                        <i ng-if="!test.success" class="fa fa-fw fa-times text-danger"></i>
+                    </span>
+                        <i ng-if="test.running" class="fa fa-fw fa-spinner fa-spin"></i>
+                        {{test.title}}
+                    <span ng-if="!test.running" class="pull-right">
+                        <i ng-if="test.$open" class="fa fa-fw fa-chevron-down"></i>
+                        <i ng-if="!test.$open" class="fa fa-fw fa-chevron-right"></i>
+                    </span>
+                    </accordion-heading>
+                    <div class="col-sm-6">
+                        <p>
+                            Tests:
+                        </p>
+                        <ul class="fa-ul">
+                            <li ng-repeat="(testName,result) in test.$testResults" style="padding-bottom: 5px;">
+                                <i ng-if="result.success" class="fa fa-li fa-fw fa-check-square-o text-success"></i>
+                                <i ng-if="!result.success" class="fa fa-li fa-fw fa-times text-danger"></i>
+                                {{testName}}
+                                <small ng-if="!result.success" style="margin-top: -3px">
+                                    <small><br>{{result.message}}</small>
+                                </small>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <p>
+                            Query:
+                        </p>
+                    <pre ng-class="{'expand': test.$expand.query}">
+<i class="pull-right fa"
+   ng-click="test.$expand.query = !test.$expand.query"
+   ng-class="{'fa-plus-square': !test.$expand.query, 'fa-minus-square': test.$expand.query}"></i>{{test.query}}</pre>
+                        <p>
+                            Results:
+                        </p>
+                    <pre ng-class="{'expand': test.$expand.results}">
+<i class="pull-right fa"
+   ng-click="test.$expand.results = !test.$expand.results"
+   ng-class="{'fa-plus-square': !test.$expand.results, 'fa-minus-square': test.$expand.results}"></i>{{test.$queryResults}}</pre>
+                    </div>
+                </accordion-group>
+            </accordion>
+        </div>
+    </div>
+</div>
+<script src="lodash.build.min.js"></script>
+<script src="bower_components/jquery/jquery.min.js"></script>
+<script src="bower_components/angular/angular.min.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+<script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+<script src="bower_components/underscore.string/dist/underscore.string.min.js"></script>
+<script src="bower_components/jscache/cache.js"></script>
+<script src="bower_components/localforage/dist/localforage.min.js"></script>
+<script src="bower_components/angular-localforage/dist/angular-localForage.min.js"></script>
+<script src="bower_components/jassa/jassa.min.js"></script>
+<script src="bower_components/js-yaml/dist/js-yaml.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
