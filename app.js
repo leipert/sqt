@@ -44,15 +44,24 @@ angular.module('SQT', [
     };
 
     var loadConfig = function (configuration) {
-        globalConfiguration = angular.copy(configuration.config);
-        globalConfiguration.prefixes = _.merge( globalConfiguration.prefixes, prefixes);
-        $localForage.setItem('config', configuration.config);
-        return configuration.tests;
+        var deferred = $q.defer();
+        console.warn(configuration)
+        if (_.isEmpty(configuration) || _.isEmpty(configuration.config) || _.isEmpty(configuration.tests)) {
+            deferred.reject();
+        } else {
+            $scope.hasInvalidConfig = false;
+            globalConfiguration = angular.copy(configuration.config);
+            globalConfiguration.prefixes = _.merge(globalConfiguration.prefixes, prefixes);
+            $localForage.setItem('config', angular.copy(configuration.config));
+            deferred.resolve(configuration.tests);
+        }
+        return deferred.promise;
     };
 
     var runTest = function (test) {
         test.running = true;
         test.$expand = {};
+        test.$testResults = undefined;
         test.config = _.merge(angular.copy(globalConfiguration), test.config);
         return $timeout(
             function () {
@@ -68,6 +77,7 @@ angular.module('SQT', [
 
     var runTestCollection = function (testCollection) {
         var promises = [];
+        testCollection = _.filter(testCollection, _.isObject);
         testCollection.forEach(function (test) {
             promises.push(runTest(test));
         });
@@ -108,16 +118,19 @@ angular.module('SQT', [
         $q.when({data: data})
             .then(loadYAML)
             .then(loadConfig)
-            .then(runTestCollection);
+            .then(runTestCollection)
+            .catch(function () {
+                $scope.hasInvalidConfig = true;
+            });
     });
 
     $scope.$watch('testCollection', function (nv) {
         if (_.isArray(nv)) {
-            $localForage.setItem('testCollection', nv);
             $scope.totalCount = nv.length;
             var runningCount = _.filter(nv, {running: true}).length;
             $scope.running = runningCount > 0;
             if ($scope.totalCount > 0) {
+                $localForage.setItem('testCollection', angular.copy(nv));
                 var successCount = _.filter(nv, {running: false, success: true}).length;
                 var failCount = _.filter(nv, {running: false, success: false}).length;
                 $scope.testRatios = {
@@ -197,8 +210,8 @@ angular.module('SQT', [
             config.url,
             config.graph
         );
-        var prefixes = _.reduce(config.prefixes, function(result, url, prefix) {
-            return result + 'PREFIX ' + prefix + ': <' + url +'>\n' ;
+        var prefixes = _.reduce(config.prefixes, function (result, url, prefix) {
+            return result + 'PREFIX ' + prefix + ': <' + url + '>\n';
         }, '');
         var qe = sparqlService.createQueryExecution(prefixes + query);
         qe.setTimeout(config.timeout); // timeout in milliseconds
@@ -209,62 +222,77 @@ angular.module('SQT', [
     var getTestResults = function (test, response) {
         var result = {
             $queryResults: JSON.stringify(response, null, 2),
-            $testResults: {},
             success: true
         };
-        test.expect.forEach(function (test) {
-            var expectedValue = null;
-            var testName = test;
-            if (_.isObject(test)) {
-                testName = _.findKey(test);
-                expectedValue = test[testName];
-            }
-            if (testSuite.hasOwnProperty(testName)) {
-                var success = testSuite[testName].test(response, expectedValue);
-                result.$testResults[testName] = {
-                    success: success,
-                    expected: expectedValue,
-                    message: testSuite[testName].message
-                };
-                result.success = result.success && success;
-            } else {
-                result.$testResults[testName] = {
-                    success: false,
-                    message: "A test named " + testName + " does not exist"
-                };
-                result.success = false;
-            }
-        });
+        if (!_.isEmpty(test.expect)) {
+            result.$testResults = {};
+            test.expect.forEach(function (test) {
+                var expectedValue = null;
+                var testName = test;
+                if (_.isObject(test)) {
+                    testName = _.findKey(test);
+                    expectedValue = test[testName];
+                }
+                if (testSuite.hasOwnProperty(testName)) {
+                    var success = testSuite[testName].test(response, expectedValue);
+                    result.$testResults[testName] = {
+                        success: success,
+                        expected: expectedValue,
+                        message: testSuite[testName].message
+                    };
+                    result.success = result.success && success;
+                } else {
+                    result.$testResults[testName] = {
+                        success: false,
+                        message: "A test named " + testName + " does not exist"
+                    };
+                    result.success = false;
+                }
+            });
+        }
         return result;
     };
 
-    var connectionError = function (data) {
-        var responseText = _.isEmpty(data.responseText)?'none':data.responseText;
-        var message = 'Could not connect to the sparql endpoint';
-        if(data.status !== 0){
-            message = 'Status: '+ data.status + ' (' + data.statusText + ')'
-        }
-        return {
-            $queryResults: responseText,
-            $testResults: {
-                'Connection Error': {
-                    success: false,
-                    message: message
-                }
-            },
+    var createErrorMessage = function (errorName, errorMessage, results) {
+        var deferred = $q.defer();
+        var ret = {
+            $queryResults: results,
+            $testResults: {},
             success: false
+        };
+        ret.$testResults[errorName] = {
+            success: false,
+            message: errorMessage
+        };
+        deferred.resolve(ret);
+        return deferred.promise;
+
+    };
+
+
+    var connectionError = function (data) {
+        var responseText = _.isEmpty(data.responseText) ? 'none' : data.responseText;
+        var message = 'Could not connect to the sparql endpoint';
+        if (data.status !== 0) {
+            message = 'Status: ' + data.status + ' (' + data.statusText + ')'
         }
+        return createErrorMessage('Connection Error', message, responseText);
     };
 
     factory.runTest = function (t) {
         var test = angular.copy(t);
+        if (_.isEmpty(test.query)) {
+            return createErrorMessage('No query defined', 'You should define a SPARQL Query.', 'none');
+        }
+        if (_.isEmpty(test.config) || _.isEmpty(test.config.url)) {
+            return createErrorMessage('No endpoint defined', 'You should define a SPARQL Endpoint.', 'none');
+        }
         return runQuery(test.config, test.query)
             .then(function (response) {
                 return getTestResults(test, response);
             })
             .catch(connectionError);
     };
-
     return factory;
 
 }).

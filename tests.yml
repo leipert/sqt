@@ -35,6 +35,11 @@ tests:
   expect:
      - containsNot :
           o: <http://example.org/nonExistent>
+- title: Query with no tests.
+  query: |
+     Select ?s ?p ?o {
+       ?s ?p ?o
+     } LIMIT 10
 - title: A misformatted SPARQL Query
   query: |
      Select ?s {
@@ -55,3 +60,4 @@ tests:
      - isEmpty
   config:
      url: //example.org/sparql
+- title:

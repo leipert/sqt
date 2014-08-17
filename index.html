@@ -10,6 +10,42 @@
 
 <body ng-controller="MainCtrl">
 <div class="container">
+    <h1 class="h2">
+        SQT
+        <small>The SPARQL-Query-Tester</small>
+    </h1>
+<p>
+    The SQT is a simple Tool which allows you to execute SPARQL-Queries within the browser and test the results.<br>
+    Below you should see the results of your last configuration or a default configuration.<br>
+    If you want to learn more about the SQT, head over to <a href="//github.com/leipert/sqt">Github</a>.
+</p>
+    <div class="ng-hide" ng-show="hasInvalidConfig">
+        <h2 class="h3">
+            Invalid configuration.
+        </h2>
+
+        <p>
+            It seems like you tried to upload an invalid configuration!<br>
+            Please make sure that your configuration is well formatted and contains a config and a tests part.<br>
+            A minimal working example would be:
+        </p>
+            <pre><span style="white-space: pre-wrap">config:
+   url: http://dbpedia.org/sparql
+tests:
+- title: Working test
+  query: |
+     Select ?s ?p ?o {
+       ?s ?p ?o .
+     } LIMIT 10</span>
+            </pre>
+        <div class="col-xs-5">
+            <div class="input-group input-group-sm ">
+                <span class="input-group-addon"><i class="fa fa-upload"></i> Upload config.yml</span>
+                <input class="form-control" id="cf2" type="file" fileread/>
+            </div>
+        </div>
+        <p>&nbsp;<br><br></p>
+    </div>
 
     <div class="ng-hide" ng-show="testCollection">
         <h2 class="h3">
@@ -68,7 +104,7 @@
         </div>
         <div class="row">
             <accordion close-others="false" class="col-xs-12">
-                <accordion-group heading="{{test.title}}"
+                <accordion-group
                                  ng-repeat="(key, test) in testCollection | filter:$search"
                                  ng-class="getTestStatusClass(test)"
                                  is-open="test.$open"
@@ -80,7 +116,7 @@
                         <i ng-if="!test.success" class="fa fa-fw fa-times text-danger"></i>
                     </span>
                         <i ng-if="test.running" class="fa fa-fw fa-spinner fa-spin"></i>
-                        {{test.title}}
+                        {{test.title || 'no test title given'}}
                     <span ng-if="!test.running">
                         <button class="btn btn-default btn-sm" ng-click="runTest(test)">
                             <i class="fa fa-fw fa-play"></i> Run again
@@ -90,6 +126,7 @@
                     </span>
                     </accordion-heading>
                     <div class="col-sm-6">
+                        <div  ng-if="test.$testResults">
                         <p>
                             Tests:
                         </p>
@@ -106,6 +143,7 @@
                                 </small>
                             </li>
                         </ul>
+                        </div>
                         <p>
                             Config:
                         </p>
