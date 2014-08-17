@@ -47,7 +47,8 @@ angular.module('SQT', [
         return $timeout(
             function () {
                 testService.runTest(globalConfiguration, test)
-                    .then(function (test) {
+                    .then(function (result) {
+                        test = _.merge(test, result);
                         test.$open = !test.success;
                         test.running = false;
                     })
@@ -117,60 +118,57 @@ angular.module('SQT', [
         }
     }, true);
 
-}).factory('testService', function ($q, $log) {
+}).factory('testService', function ($q) {
     _.mixin(_.str.exports());
 
     var factory = {};
     var service = jassa.service;
 
-    var tester = {
-        isEmpty: function (data) {
-            var success = (data.length === 0), message = '';
-            if (!success) {
-                message = 'Expected query result to be empty. It contained ' + data.length + ' items.';
+    var testSuite = {
+        isEmpty: {
+            test: function (data) {
+                return _.isEmpty(data)
+            },
+            message: function () {
+                return 'Expected result to be empty.'
             }
-            return {success: success, message: message}
         },
-        isNotEmpty: function (data) {
-            var success = (data.length > 0), message = '';
-            if (!success) {
-                message = 'Expected query result to be not empty';
+        isNotEmpty: {
+            test: function (data) {
+                return !_.isEmpty(data)
+            },
+            message: function () {
+                return 'Expected result not to be empty.'
             }
-            return {success: success, message: message}
+        },
+        contains: {
+            test: function (data, value) {
+                return (!_.isUndefined(_.find(data, value)));
+            },
+            message: function (data, value) {
+                return 'Expected data to contain' + JSON.stringify(value)
+            }
+        },
+        containsNot: {
+            test: function (data, value) {
+                return (_.isUndefined(_.find(data, value)));
+            },
+            message: function (data, value) {
+                return 'Expected data not to contain' + JSON.stringify(value)
+            }
         }
     };
 
-    factory.runTest = function (config, test) {
-        var config = angular.copy(config);
-        return factory.runQuery(_.merge(config, test.config), test.query)
-            .then(function (data) {
-                var results = {
-                    $queryResults: JSON.stringify(data, null, 2),
-                    $testResults: {},
-                    success: true
-                };
-                _.forIn(test.expect, function (value, key) {
-                    if (tester.hasOwnProperty(key)) {
-                        results.$testResults[key] = tester[key](data, value);
-                        results.success = results.success && results.$testResults[key].success;
-                    }
-                });
-                return _.merge(test, results);
-            }).catch(function () {
-                return _.merge(test, {
-                    $queryResults: 'none',
-                    $testResults: {
-                        connectToServer: {
-                            success: false,
-                            message: 'Could Not Connect to ' + test.config.url
-                        }
-                    },
-                    success: false
-                })
-            })
+    var parseResult = function (response) {
+        var ret = [];
+        while (response.hasNext()) {
+            ret.push(
+                JSON.parse(response.nextBinding().toString()));
+        }
+        return ret;
     };
 
-    factory.runQuery = function (config, query) {
+    var runQuery = function (config, query) {
         var sparqlService = new service.SparqlServiceHttp(
             config.url,
             [config.graph]
@@ -178,16 +176,62 @@ angular.module('SQT', [
         var qe = sparqlService.createQueryExecution(query);
         qe.setTimeout(config.timeout); // timeout in milliseconds
 
-        return $q.when(qe.execSelect()).then(
-            function (response) {
-                var ret = [];
-                while (response.hasNext()) {
-                    ret.push(
-                        JSON.parse(response.nextBinding().toString()));
-                }
-                return ret;
-            }
-        );
+        return $q.when(qe.execSelect()).then(parseResult);
     };
+
+    var getTestResults = function (test, response) {
+        var result = {
+            $queryResults: JSON.stringify(response, null, 2),
+            $testResults: {},
+            success: true
+        };
+        test.expect.forEach(function (test) {
+            var expectedValue = '';
+            var testName = test;
+            if (_.isObject(test)) {
+                testName = _.findKey(test);
+                expectedValue = test[testName];
+            }
+            if (testSuite.hasOwnProperty(testName)) {
+                var success = testSuite[testName].test(response, expectedValue);
+                result.$testResults[testName] = {
+                    success: success,
+                    message: testSuite[testName].message(response, expectedValue)
+                };
+                result.success = result.success && success;
+            } else {
+                result.$testResults[testName] = {
+                    success: false,
+                    message: "Well a test named " + testName + " does not exist"
+                };
+                result.success = false;
+            }
+        });
+        return result;
+    };
+
+    var connectionError = function (data) {
+        return {
+            $queryResults: 'none',
+            $testResults: {
+                connectToServer: {
+                    success: false,
+                    message: 'Could not connect to the sparql endpoint'
+                }
+            },
+            success: false
+        }
+    };
+
+    factory.runTest = function (c, t) {
+        var config = angular.copy(c);
+        var test = angular.copy(t);
+        return runQuery(_.merge(config, test.config), test.query)
+            .then(function (response) {
+                return getTestResults(test, response);
+            })
+            .catch(connectionError);
+    };
+
     return factory;
 });

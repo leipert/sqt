@@ -12,14 +12,15 @@
 <div class="container">
 
     <div class="ng-hide" ng-show="testCollection">
-        <h2 class="h3" ng-if="!running">
+        <h2 class="h3">
             Test Results
-            <a href="#" class="btn btn-default" ng-click="runTestCollection(testCollection)">
+            <a href="#" ng-if="!running" class="btn btn-default" ng-click="runTestCollection(testCollection)">
                 <i class="fa fa-fw fa-play"></i> Run Tests again
             </a>
+            <button href="#" ng-if="running" disabled class="btn btn-default">
+                <i class="fa fa-fw fa-spinner fa-spin"></i> Tests running
+            </button>
         </h2>
-
-        <h2 class="h3" ng-if="running">Tests running <i class="fa fa-fw fa-spinner fa-spin"></i></h2>
 
         <div class="row">
             <form class="form-inline" role="form">
@@ -57,8 +58,8 @@
         <br>
 
         <div>
-            <progress>
-                <bar ng-repeat="bar in testRatios" value="bar.value" type="{{bar.type}}">
+            <progress animate="false" >
+                <bar ng-repeat="bar in testRatios" value="bar.value" type="{{bar.type}}" animate="false" >
                     <span ng-hide="bar.value < 5">
                         <b>{{bar.amount}} of {{bar.total}} tests {{bar.text}} ({{bar.value | number:0}}%)</b>
                     </span>
@@ -66,7 +67,6 @@
             </progress>
         </div>
         <div class="row">
-
             <accordion close-others="false" class="col-xs-12">
                 <accordion-group heading="{{test.title}}"
                                  ng-repeat="(key, test) in testCollection | filter:$search"

@@ -1,6 +1,6 @@
 config:
   url: //ssl.leipert.io/sparql
-  graph: http://example.org/
+  graph: http://gsb.leipert.io/ns/
   timeout: 5000
 tests:
 - title: isNotEmpty
@@ -9,34 +9,45 @@ tests:
        ?s ?p ?o
      } LIMIT 10
   expect:
-     isNotEmpty:
-     nonExistentTest: lalalaa
-  config:
-     graph: http://gsb.leipert.io/ns/
+     - isNotEmpty
 - title: isEmpty
   query: |
      Select ?s {
        ?s a rdfs:nonsense
      } LIMIT 10
   expect:
-     isEmpty:
+     - isEmpty
+- title: contains
+  query: |
+     Select ?s ?p ?o {
+       ?s ?p ?o
+     } LIMIT 10
+  expect:
+     - contains :
+          o: <http://www.w3.org/2002/07/owl#DataProperty>
+- title: containsNot
+  query: |
+     Select ?s ?p ?o {
+       ?s ?p ?o
+     } LIMIT 10
+  expect:
+     - containsNot :
+          o: <http://example.org/nonExistent>
 - title: A failing test
   query: |
      Select ?s ?p ?o {
        ?s ?p ?o
      } LIMIT 10
   expect:
-     isNotEmpty:
-     isEmpty:
-  config:
-     graph: ''
-- title: A failing url
+     - isNotEmpty
+     - isEmpty
+     - nonExistentTest: lalalaa
+- title: A non existing sparql endpoint
   query: |
      Select ?s ?p ?o {
        ?s ?p ?o
      } LIMIT 10
   expect:
-     isNotEmpty:
-     isEmpty:
+     - isEmpty
   config:
      url: //example.org/sparql

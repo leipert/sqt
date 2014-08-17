@@ -22,8 +22,13 @@
 }
 .panel-heading > .panel-title a {
     padding: 10px 15px;
+    line-height: 30px;
     cursor: pointer;
     text-decoration: none;
+}
+
+.panel-heading > .panel-title a .fa.pull-right {
+    line-height: 30px;
 }
 
 pre {
