@@ -68,6 +68,7 @@ angular.module('SQT', [
     var initialize = function () {
         $scope.$search = {};
         $scope.testRatios = [];
+        $scope.totalCount = 0;
         $scope.testCollection = undefined;
 
         restoreLastConfig()
@@ -103,17 +104,22 @@ angular.module('SQT', [
     $scope.$watch('testCollection', function (nv) {
         if (_.isArray(nv)) {
             $localForage.setItem('testCollection', nv);
-            var running = _.filter(nv, {running: true}).length;
-            $scope.running = running > 0;
-            var success = _.filter(nv, {running: false, success: true}).length;
-            var failure = _.filter(nv, {running: false, success: false}).length;
-            var total = nv.length;
-            if (total > 0) {
-                $scope.testRatios = [
-                    {value: running * 100 / total, amount: running, total: total, type: 'default', text: 'running'},
-                    {value: success * 100 / total, amount: success, total: total, type: 'success', text: 'successful'},
-                    {value: failure * 100 / total, amount: failure, total: total, type: 'danger', text: 'failed'}
-                ];
+            $scope.totalCount = nv.length;
+            var runningCount = _.filter(nv, {running: true}).length;
+            $scope.running = runningCount > 0;
+            if ($scope.totalCount > 0) {
+                var successCount = _.filter(nv, {running: false, success: true}).length;
+                var failCount = _.filter(nv, {running: false, success: false}).length;
+                $scope.testRatios = {
+                    running: {value: Math.floor(runningCount * 100 / $scope.totalCount), amount: runningCount, type: 'default'},
+                    successful: {value: Math.floor(successCount * 100 / $scope.totalCount), amount: successCount, type: 'success'},
+                    failed: {value: Math.floor(failCount * 100 / $scope.totalCount), amount: failCount, type: 'danger'}
+                };
+                var sum = _.reduce(_.pluck($scope.testRatios,'value'), function(sum,c){return sum + c});
+                if (sum < 100) {
+                    var max = _.findKey($scope.testRatios, _.max($scope.testRatios,'value'));
+                    $scope.testRatios[max].value += 100 - sum;
+                }
             }
         }
     }, true);

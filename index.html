@@ -59,9 +59,9 @@
 
         <div>
             <progress animate="false" >
-                <bar ng-repeat="bar in testRatios" value="bar.value" type="{{bar.type}}" animate="false" >
+                <bar ng-repeat="(label,bar) in testRatios" value="bar.value" type="{{bar.type}}" animate="false" >
                     <span ng-hide="bar.value < 5">
-                        <b>{{bar.amount}} of {{bar.total}} tests {{bar.text}} ({{bar.value | number:0}}%)</b>
+                        <b>{{bar.amount}} of {{totalCount}} tests {{label}} (~{{bar.value | number:0}}%)</b>
                     </span>
                 </bar>
             </progress>
