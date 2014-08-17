@@ -37,7 +37,7 @@ angular.module('SQT', [
 
     var loadConfig = function (configuration) {
         globalConfiguration = angular.copy(configuration.config);
-        _.merge($scope.prefixes,globalConfiguration.prefixes);
+        _.merge($scope.prefixes, globalConfiguration.prefixes);
         $localForage.setItem('config', configuration.config);
         return configuration.tests;
     };
@@ -45,7 +45,7 @@ angular.module('SQT', [
     var runTest = function (test) {
         test.running = true;
         test.$expand = {};
-        test.config = _.merge(angular.copy(globalConfiguration),test.config);
+        test.config = _.merge(angular.copy(globalConfiguration), test.config);
         return $timeout(
             function () {
                 testService.runTest(test)
@@ -119,13 +119,23 @@ angular.module('SQT', [
                 var successCount = _.filter(nv, {running: false, success: true}).length;
                 var failCount = _.filter(nv, {running: false, success: false}).length;
                 $scope.testRatios = {
-                    running: {value: Math.floor(runningCount * 100 / $scope.totalCount), amount: runningCount, type: 'default'},
-                    successful: {value: Math.floor(successCount * 100 / $scope.totalCount), amount: successCount, type: 'success'},
+                    running: {
+                        value: Math.floor(runningCount * 100 / $scope.totalCount),
+                        amount: runningCount,
+                        type: 'default'
+                    },
+                    successful: {
+                        value: Math.floor(successCount * 100 / $scope.totalCount),
+                        amount: successCount,
+                        type: 'success'
+                    },
                     failed: {value: Math.floor(failCount * 100 / $scope.totalCount), amount: failCount, type: 'danger'}
                 };
-                var sum = _.reduce(_.pluck($scope.testRatios,'value'), function(sum,c){return sum + c});
+                var sum = _.reduce(_.pluck($scope.testRatios, 'value'), function (sum, c) {
+                    return sum + c
+                });
                 if (sum < 100) {
-                    var max = _.findKey($scope.testRatios, _.max($scope.testRatios,'value'));
+                    var max = _.findKey($scope.testRatios, _.max($scope.testRatios, 'value'));
                     $scope.testRatios[max].value += 100 - sum;
                 }
             }
@@ -143,33 +153,25 @@ angular.module('SQT', [
             test: function (data) {
                 return _.isEmpty(data)
             },
-            message: function () {
-                return 'Expected result to be empty.'
-            }
+            message: 'Expected result to be empty.'
         },
         isNotEmpty: {
             test: function (data) {
                 return !_.isEmpty(data)
             },
-            message: function () {
-                return 'Expected result not to be empty.'
-            }
+            message: 'Expected result not to be empty.'
         },
         contains: {
             test: function (data, value) {
                 return (!_.isUndefined(_.find(data, value)));
             },
-            message: function (data, value) {
-                return 'Expected data to contain' + JSON.stringify(value)
-            }
+            message: 'Expected data to contain:'
         },
         containsNot: {
             test: function (data, value) {
                 return (_.isUndefined(_.find(data, value)));
             },
-            message: function (data, value) {
-                return 'Expected data not to contain' + JSON.stringify(value)
-            }
+            message: 'Expected data not to contain:'
         }
     };
 
@@ -183,10 +185,10 @@ angular.module('SQT', [
     };
 
     var runQuery = function (config, query) {
-        if(!_.isArray(config.graph))        {
+        if (!_.isArray(config.graph)) {
             config.graph = [config.graph];
         }
-        if(!_.isNumber(config.timeout)){
+        if (!_.isNumber(config.timeout)) {
             config.timeout = 5000;
         }
         var sparqlService = new service.SparqlServiceHttp(
@@ -206,7 +208,7 @@ angular.module('SQT', [
             success: true
         };
         test.expect.forEach(function (test) {
-            var expectedValue = '';
+            var expectedValue = null;
             var testName = test;
             if (_.isObject(test)) {
                 testName = _.findKey(test);
@@ -216,7 +218,8 @@ angular.module('SQT', [
                 var success = testSuite[testName].test(response, expectedValue);
                 result.$testResults[testName] = {
                     success: success,
-                    message: testSuite[testName].message(response, expectedValue)
+                    expected: expectedValue,
+                    message: testSuite[testName].message
                 };
                 result.success = result.success && success;
             } else {
@@ -254,17 +257,18 @@ angular.module('SQT', [
 
     return factory;
 
-}).filter('replaceURIsWithPrefixes', function(){
-    return function (string, prefixes){
-        if(_.isString(string)) {
-            for (var key in prefixes) {
-                if (prefixes.hasOwnProperty(key)) {
-                    var regex = new RegExp('<?' + prefixes[key] + '(\\w+)>?', 'ig');
-                    string = string.replace(regex, key + ':$1');
+}).
+    filter('replaceURIsWithPrefixes', function () {
+        return function (string, prefixes) {
+            if (_.isString(string)) {
+                for (var key in prefixes) {
+                    if (prefixes.hasOwnProperty(key)) {
+                        var regex = new RegExp('<?' + prefixes[key] + '(\\w+)>?', 'ig');
+                        string = string.replace(regex, key + ':$1');
+                    }
                 }
             }
-        }
-        return string;
-    };
-})
+            return string;
+        };
+    })
 ;

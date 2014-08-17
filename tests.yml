@@ -15,7 +15,7 @@ tests:
 - title: isEmpty
   query: |
      Select ?s {
-       ?s a rdfs:nonsense
+       ?s a example:nonExistent
      } LIMIT 10
   expect:
      - isEmpty

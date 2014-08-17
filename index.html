@@ -101,6 +101,9 @@
                                 <small ng-if="!result.success" style="margin-top: -3px">
                                     <small><br>{{result.message}}</small>
                                 </small>
+                                <small ng-if="result.expected" style="margin-top: -3px">
+                                    <small><br>{{result.expected}}</small>
+                                </small>
                             </li>
                         </ul>
                         <p>
