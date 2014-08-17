@@ -37,6 +37,7 @@ angular.module('SQT', [
 
     var loadConfig = function (configuration) {
         globalConfiguration = angular.copy(configuration.config);
+        _.merge($scope.prefixes,globalConfiguration.prefixes);
         $localForage.setItem('config', configuration.config);
         return configuration.tests;
     };
@@ -44,9 +45,10 @@ angular.module('SQT', [
     var runTest = function (test) {
         test.running = true;
         test.$expand = {};
+        test.config = _.merge(angular.copy(globalConfiguration),test.config);
         return $timeout(
             function () {
-                testService.runTest(globalConfiguration, test)
+                testService.runTest(test)
                     .then(function (result) {
                         test = _.merge(test, result);
                         test.$open = !test.success;
@@ -70,6 +72,12 @@ angular.module('SQT', [
         $scope.testRatios = [];
         $scope.totalCount = 0;
         $scope.testCollection = undefined;
+        $scope.prefixes = {
+            'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
+            'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+            'foaf': 'http://xmlns.com/foaf/0.1/',
+            'owl': 'http://www.w3.org/2002/07/owl#'
+        };
 
         restoreLastConfig()
             .then(loadConfig)
@@ -175,9 +183,15 @@ angular.module('SQT', [
     };
 
     var runQuery = function (config, query) {
+        if(!_.isArray(config.graph))        {
+            config.graph = [config.graph];
+        }
+        if(!_.isNumber(config.timeout)){
+            config.timeout = 5000;
+        }
         var sparqlService = new service.SparqlServiceHttp(
             config.url,
-            [config.graph]
+            config.graph
         );
         var qe = sparqlService.createQueryExecution(query);
         qe.setTimeout(config.timeout); // timeout in milliseconds
@@ -208,7 +222,7 @@ angular.module('SQT', [
             } else {
                 result.$testResults[testName] = {
                     success: false,
-                    message: "Well a test named " + testName + " does not exist"
+                    message: "A test named " + testName + " does not exist"
                 };
                 result.success = false;
             }
@@ -229,10 +243,9 @@ angular.module('SQT', [
         }
     };
 
-    factory.runTest = function (c, t) {
-        var config = angular.copy(c);
+    factory.runTest = function (t) {
         var test = angular.copy(t);
-        return runQuery(_.merge(config, test.config), test.query)
+        return runQuery(test.config, test.query)
             .then(function (response) {
                 return getTestResults(test, response);
             })
@@ -240,4 +253,18 @@ angular.module('SQT', [
     };
 
     return factory;
-});
+
+}).filter('replaceURIsWithPrefixes', function(){
+    return function (string, prefixes){
+        if(_.isString(string)) {
+            for (var key in prefixes) {
+                if (prefixes.hasOwnProperty(key)) {
+                    var regex = new RegExp('<?' + prefixes[key] + '(\\w+)>?', 'ig');
+                    string = string.replace(regex, key + ':$1');
+                }
+            }
+        }
+        return string;
+    };
+})
+;

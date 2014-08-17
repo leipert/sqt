@@ -58,8 +58,8 @@
         <br>
 
         <div>
-            <progress animate="false" >
-                <bar ng-repeat="(label,bar) in testRatios" value="bar.value" type="{{bar.type}}" animate="false" >
+            <progress animate="false">
+                <bar ng-repeat="(label,bar) in testRatios" value="bar.value" type="{{bar.type}}" animate="false">
                     <span ng-hide="bar.value < 5">
                         <b>{{bar.amount}} of {{totalCount}} tests {{label}} (~{{bar.value | number:0}}%)</b>
                     </span>
@@ -103,6 +103,14 @@
                                 </small>
                             </li>
                         </ul>
+                        <p>
+                            Config:
+                        </p>
+                         <pre>
+                             <b>Endpoint:</b> {{test.config.url}}<br>
+                             <b>DefaultGraph:</b> {{test.config.graph}}<br>
+                             <b>Timeout:</b> {{test.config.timeout || 5000}}<br>
+                         </pre>
                     </div>
 
                     <div class="col-sm-6">
@@ -110,16 +118,20 @@
                             Query:
                         </p>
                     <pre ng-class="{'expand': test.$expand.query}">
-<i class="pull-right fa"
-   ng-click="test.$expand.query = !test.$expand.query"
-   ng-class="{'fa-plus-square': !test.$expand.query, 'fa-minus-square': test.$expand.query}"></i>{{test.query}}</pre>
+                        <i class="pull-right fa"
+                           ng-click="test.$expand.query = !test.$expand.query" style="white-space: normal"
+                           ng-class="{'fa-plus-square': !test.$expand.query, 'fa-minus-square': test.$expand.query}"></i>
+                        <span>{{test.query}}</span>
+                    </pre>
                         <p>
                             Results:
                         </p>
                     <pre ng-class="{'expand': test.$expand.results}">
-<i class="pull-right fa"
-   ng-click="test.$expand.results = !test.$expand.results"
-   ng-class="{'fa-plus-square': !test.$expand.results, 'fa-minus-square': test.$expand.results}"></i>{{test.$queryResults}}</pre>
+                        <i class="pull-right fa"
+                           ng-click="test.$expand.results = !test.$expand.results"
+                           ng-class="{'fa-plus-square': !test.$expand.results, 'fa-minus-square': test.$expand.results}"></i>
+                        <span>{{test.$queryResults | replaceURIsWithPrefixes : prefixes}}</span>
+                    </pre>
                     </div>
                 </accordion-group>
             </accordion>

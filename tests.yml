@@ -2,6 +2,8 @@ config:
   url: //ssl.leipert.io/sparql
   graph: http://gsb.leipert.io/ns/
   timeout: 5000
+  prefixes:
+    gsb: http://gsb.leipert.io/ns/
 tests:
 - title: isNotEmpty
   query: |
@@ -42,6 +44,10 @@ tests:
      - isNotEmpty
      - isEmpty
      - nonExistentTest: lalalaa
+  config:
+    graph:
+      - http://gsb.leipert.io/ns/
+      - http://dbpedia.org/
 - title: A non existing sparql endpoint
   query: |
      Select ?s ?p ?o {
