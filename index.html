@@ -11,8 +11,16 @@
 <body ng-controller="MainCtrl">
 <div class="container">
 
-    <div ng-if="tests">
-        <h2 class="h3">Test Results</h2>
+    <div class="ng-hide" ng-show="testCollection">
+        <h2 class="h3" ng-if="!running">
+            Test Results
+            <a href="#" class="btn btn-default" ng-click="runTestCollection(testCollection)">
+                <i class="fa fa-fw fa-play"></i> Run Tests again
+            </a>
+        </h2>
+
+        <h2 class="h3" ng-if="running">Tests running <i class="fa fa-fw fa-spinner fa-spin"></i></h2>
+
         <div class="row">
             <form class="form-inline" role="form">
                 <div class="form-group col-xs-4">
@@ -22,9 +30,21 @@
                     </div>
                 </div>
                 <div class="form-group col-xs-2">
-                    <button type="button" class="btn btn-sm btn-default" ng-click="$search.success = undefined" ng-show="$search.success">Show All</button>
-                    <button type="button" class="btn btn-sm btn-default" ng-click="$search.success = false" ng-show="$search.success === undefined">Show only Failed</button>
-                    <button type="button" class="btn btn-sm btn-default" ng-click="$search.success = true" ng-show="$search.success === false">Show only Successful</button>
+                    <button type="button" class="btn btn-sm btn-default"
+                            ng-click="$search.success = undefined"
+                            ng-show="$search.success">
+                        Show All
+                    </button>
+                    <button type="button" class="btn btn-sm btn-default"
+                            ng-click="$search.success = false"
+                            ng-show="$search.success === undefined">
+                        Show only Failed
+                    </button>
+                    <button type="button" class="btn btn-sm btn-default"
+                            ng-click="$search.success = true"
+                            ng-show="$search.success === false">
+                        Show only Successful
+                    </button>
                 </div>
                 <div class="form-group pull-right col-xs-5">
                     <div class="input-group input-group-sm ">
@@ -35,19 +55,22 @@
             </form>
         </div>
         <br>
+
         <div>
             <progress>
                 <bar ng-repeat="bar in testRatios" value="bar.value" type="{{bar.type}}">
-                    <span ng-hide="bar.value < 5"><b>{{bar.amount}} of {{bar.total}} tests {{bar.text}} ({{bar.value | number:0}}%)</b></span>
+                    <span ng-hide="bar.value < 5">
+                        <b>{{bar.amount}} of {{bar.total}} tests {{bar.text}} ({{bar.value | number:0}}%)</b>
+                    </span>
                 </bar>
             </progress>
         </div>
         <div class="row">
 
-            <accordion close-others="true" class="col-xs-12">
+            <accordion close-others="false" class="col-xs-12">
                 <accordion-group heading="{{test.title}}"
-                                 ng-repeat="(key, test) in tests | filter:$search"
-                                 ng-class="getStatusClass(test)"
+                                 ng-repeat="(key, test) in testCollection | filter:$search"
+                                 ng-class="getTestStatusClass(test)"
                                  is-open="test.$open"
                                  is-disabled="test.running"
                         >
@@ -58,9 +81,12 @@
                     </span>
                         <i ng-if="test.running" class="fa fa-fw fa-spinner fa-spin"></i>
                         {{test.title}}
-                    <span ng-if="!test.running" class="pull-right">
-                        <i ng-if="test.$open" class="fa fa-fw fa-chevron-down"></i>
-                        <i ng-if="!test.$open" class="fa fa-fw fa-chevron-right"></i>
+                    <span ng-if="!test.running">
+                        <button class="btn btn-default btn-sm" ng-click="runTest(test)">
+                            <i class="fa fa-fw fa-play"></i> Run again
+                        </button>
+                        <i ng-if="test.$open" class="fa fa-fw fa-chevron-down pull-right"></i>
+                        <i ng-if="!test.$open" class="fa fa-fw fa-chevron-right pull-right"></i>
                     </span>
                     </accordion-heading>
                     <div class="col-sm-6">
