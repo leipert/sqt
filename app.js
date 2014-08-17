@@ -24,7 +24,7 @@ angular.module('SQT', [
         'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
         'owl': 'http://www.w3.org/2002/07/owl#',
         'xsd': 'http://www.w3.org/2001/XMLSchema#',
-        'wsg82': 'http://www.w3.org/2003/01/geo/wgs84_pos#'
+        'wsg84': 'http://www.w3.org/2003/01/geo/wgs84_pos#'
     };
 
     var globalConfiguration = {};
