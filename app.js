@@ -19,6 +19,14 @@ angular.module('SQT', [
     }
 }).controller('MainCtrl', function ($scope, $q, $http, testService, $localForage, $timeout) {
 
+    var prefixes = {
+        'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
+        'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+        'owl': 'http://www.w3.org/2002/07/owl#',
+        'xsd': 'http://www.w3.org/2001/XMLSchema#',
+        'wsg82': 'http://www.w3.org/2003/01/geo/wgs84_pos#'
+    };
+
     var globalConfiguration = {};
 
     var restoreLastConfig = function () {
@@ -37,7 +45,7 @@ angular.module('SQT', [
 
     var loadConfig = function (configuration) {
         globalConfiguration = angular.copy(configuration.config);
-        _.merge($scope.prefixes, globalConfiguration.prefixes);
+        globalConfiguration.prefixes = _.merge( globalConfiguration.prefixes, prefixes);
         $localForage.setItem('config', configuration.config);
         return configuration.tests;
     };
@@ -72,12 +80,6 @@ angular.module('SQT', [
         $scope.testRatios = [];
         $scope.totalCount = 0;
         $scope.testCollection = undefined;
-        $scope.prefixes = {
-            'rdfs': 'http://www.w3.org/2000/01/rdf-schema#',
-            'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-            'foaf': 'http://xmlns.com/foaf/0.1/',
-            'owl': 'http://www.w3.org/2002/07/owl#'
-        };
 
         restoreLastConfig()
             .then(loadConfig)
@@ -195,7 +197,10 @@ angular.module('SQT', [
             config.url,
             config.graph
         );
-        var qe = sparqlService.createQueryExecution(query);
+        var prefixes = _.reduce(config.prefixes, function(result, url, prefix) {
+            return result + 'PREFIX ' + prefix + ': <' + url +'>\n' ;
+        }, '');
+        var qe = sparqlService.createQueryExecution(prefixes + query);
         qe.setTimeout(config.timeout); // timeout in milliseconds
 
         return $q.when(qe.execSelect()).then(parseResult);
@@ -234,12 +239,17 @@ angular.module('SQT', [
     };
 
     var connectionError = function (data) {
+        var responseText = _.isEmpty(data.responseText)?'none':data.responseText;
+        var message = 'Could not connect to the sparql endpoint';
+        if(data.status !== 0){
+            message = 'Status: '+ data.status + ' (' + data.statusText + ')'
+        }
         return {
-            $queryResults: 'none',
+            $queryResults: responseText,
             $testResults: {
-                connectToServer: {
+                'Connection Error': {
                     success: false,
-                    message: 'Could not connect to the sparql endpoint'
+                    message: message
                 }
             },
             success: false

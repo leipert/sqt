@@ -7,26 +7,26 @@ config:
 tests:
 - title: isNotEmpty
   query: |
-     Select ?s ?p ?o {
-       ?s ?p ?o
+     Select ?s {
+       gsb:Agent rdfs:isDefinedBy ?s .
      } LIMIT 10
   expect:
      - isNotEmpty
 - title: isEmpty
   query: |
      Select ?s {
-       ?s a example:nonExistent
+       ?s a dbpedia:nonExistent
      } LIMIT 10
   expect:
      - isEmpty
 - title: contains
   query: |
-     Select ?s ?p ?o {
-       ?s ?p ?o
+     Select ?s ?p {
+       ?s ?p owl:Ontology
      } LIMIT 10
   expect:
      - contains :
-          o: <http://www.w3.org/2002/07/owl#DataProperty>
+          s: <http://gsb.leipert.io/ns/>
 - title: containsNot
   query: |
      Select ?s ?p ?o {
@@ -35,14 +35,12 @@ tests:
   expect:
      - containsNot :
           o: <http://example.org/nonExistent>
-- title: A failing test
+- title: A misformatted SPARQL Query
   query: |
-     Select ?s ?p ?o {
-       ?s ?p ?o
+     Select ?s {
+       ?s a missing:prefix
      } LIMIT 10
   expect:
-     - isNotEmpty
-     - isEmpty
      - nonExistentTest: lalalaa
   config:
     graph:
