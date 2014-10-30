@@ -10,25 +10,26 @@
 
 <body ng-controller="MainCtrl">
 <div class="container">
-    <h1 class="h2">
-        SQT
-        <small>The SPARQL-Query-Tester</small>
-    </h1>
+<h1 class="h2">
+    SQT
+    <small>The SPARQL-Query-Tester</small>
+</h1>
 <p>
     The SQT is a simple Tool which allows you to execute SPARQL-Queries within the browser and test the results.<br>
     Below you should see the results of your last configuration or a default configuration.<br>
     If you want to learn more about the SQT, head over to <a href="//github.com/leipert/sqt">Github</a>.
 </p>
-    <div class="ng-hide" ng-show="hasInvalidConfig">
-        <h2 class="h3">
-            Invalid configuration.
-        </h2>
 
-        <p>
-            It seems like you tried to upload an invalid configuration!<br>
-            Please make sure that your configuration is well formatted and contains a config and a tests part.<br>
-            A minimal working example would be:
-        </p>
+<div class="ng-hide" ng-show="hasInvalidConfig || testCollection.length === 0">
+    <h2 class="h3">
+        Invalid configuration.
+    </h2>
+
+    <p>
+        It seems like you tried to upload an invalid configuration!<br>
+        Please make sure that your configuration is well formatted and contains a config and a tests part.<br>
+        A minimal working example would be:
+    </p>
             <pre><span style="white-space: pre-wrap">config:
    url: http://dbpedia.org/sparql
 tests:
@@ -38,100 +39,143 @@ tests:
        ?s ?p ?o .
      } LIMIT 10</span>
             </pre>
-        <div class="col-xs-5">
-            <div class="input-group input-group-sm ">
-                <span class="input-group-addon"><i class="fa fa-upload"></i> Upload config.yml</span>
-                <input class="form-control" id="cf2" type="file" fileread/>
+    <div class="col-xs-5">
+        <div class="input-group input-group-sm ">
+            <span class="input-group-addon"><i class="fa fa-upload"></i> Upload config.yml</span>
+            <input class="form-control" id="cf2" type="file" fileread/>
+        </div>
+    </div>
+    <p>&nbsp;<br><br></p>
+</div>
+
+<div class="ng-hide" ng-show="testCollection">
+    <div class="row">
+        <div class="h3">
+            <div class="col-md-8 col-xs-6">
+                Test Results
+                <a href="#" ng-if="!running" class="btn btn-default" ng-click="runTestCollection(testCollection)">
+                    <i class="fa fa-fw fa-play"></i> Test all
+                </a>
+                <a href="#" ng-if="!running" class="btn btn-default" ng-click="runTestCollectionBenchmark(testCollection)">
+                    <i class="fa fa-fw fa-bar-chart"></i> Benchmark all
+                </a>
+                <button href="#" ng-if="running" disabled class="btn btn-default">
+                    <i class="fa fa-fw fa-spinner fa-spin"></i> Tests running
+                </button>
+            </div>
+            <div class="form-group col-md-4 col-xs-6">
+                <div class="input-group input-group-sm pull-right">
+                    <span class="input-group-addon"><i class="fa fa-upload"></i> Upload config.yml</span>
+                    <input class="form-control" id="configFile" type="file" fileread/>
+                </div>
             </div>
         </div>
-        <p>&nbsp;<br><br></p>
     </div>
 
-    <div class="ng-hide" ng-show="testCollection">
-        <h2 class="h3">
-            Test Results
-            <a href="#" ng-if="!running" class="btn btn-default" ng-click="runTestCollection(testCollection)">
-                <i class="fa fa-fw fa-play"></i> Run Tests again
-            </a>
-            <button href="#" ng-if="running" disabled class="btn btn-default">
-                <i class="fa fa-fw fa-spinner fa-spin"></i> Tests running
-            </button>
-        </h2>
-
-        <div class="row">
-            <form class="form-inline" role="form">
-                <div class="form-group col-xs-4">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-addon"><i class="fa fa-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Search Tests" ng-model="$search.$">
-                    </div>
+    <div class="row">
+        <div class="col-xs-12 col-md-4">
+            <div class="form-group">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Search Tests" ng-model="$search.$">
                 </div>
-                <div class="form-group col-xs-2">
-                    <button type="button" class="btn btn-sm btn-default"
-                            ng-click="$search.success = undefined"
-                            ng-show="$search.success">
-                        Show All
-                    </button>
-                    <button type="button" class="btn btn-sm btn-default"
-                            ng-click="$search.success = false"
-                            ng-show="$search.success === undefined">
-                        Show only Failed
-                    </button>
-                    <button type="button" class="btn btn-sm btn-default"
-                            ng-click="$search.success = true"
-                            ng-show="$search.success === false">
-                        Show only Successful
-                    </button>
-                </div>
-                <div class="form-group pull-right col-xs-5">
-                    <div class="input-group input-group-sm ">
-                        <span class="input-group-addon"><i class="fa fa-upload"></i> Upload config.yml</span>
-                        <input class="form-control" id="configFile" type="file" fileread/>
-                    </div>
-                </div>
-            </form>
+            </div>
         </div>
-        <br>
+        <div class="col-xs-6 col-md-4">
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-sm btn-default"
+                        ng-click="autoOpen = false"
+                        ng-show="autoOpen">
+                    <i class="fa fa-chevron-down"></i>Auto open failed
+                </button>
+                <button type="button" class="btn btn-sm btn-default"
+                        ng-click="autoOpen = true"
+                        ng-hide="autoOpen">
+                    <i class="fa fa-chevron-left"></i> Do not auto open failed
+                </button>
+                <button type="button" class="btn btn-sm btn-default"
+                        ng-click="$search.success = undefined"
+                        ng-show="$search.success">
+                    Show All
+                </button>
+                <button type="button" class="btn btn-sm btn-default"
+                        ng-click="$search.success = false"
+                        ng-show="$search.success === undefined">
+                    Show only Failed
+                </button>
+                <button type="button" class="btn btn-sm btn-default"
+                        ng-click="$search.success = true"
+                        ng-show="$search.success === false">
+                    Show only Successful
+                </button>
 
-        <div>
-            <progress animate="false">
-                <bar ng-repeat="(label,bar) in testRatios" value="bar.value" type="{{bar.type}}" animate="false">
+            </div>
+        </div>
+
+        <div class="col-xs-6 col-md-4">
+            <div class="input-group input-group-sm">
+                <span class="input-group-addon">Benchmark Runs:</span>
+                <select class="form-control" ng-model="benchMarkRuns" ng-options="x for x in [1,10,50,100]"></select>
+            </div>
+        </div>
+    </div>
+    <br>
+
+    <div>
+        <progress animate="false">
+            <bar ng-repeat="(label,bar) in testRatios" value="bar.value" type="{{bar.type}}" animate="false">
                     <span ng-hide="bar.value < 5">
                         <b>{{bar.amount}} of {{totalCount}} tests {{label}} (~{{bar.value | number:0}}%)</b>
                     </span>
-                </bar>
-            </progress>
-        </div>
-        <div class="row">
-            <accordion close-others="false" class="col-xs-12">
-                <accordion-group
-                                 ng-repeat="(key, test) in testCollection | filter:$search"
-                                 ng-class="getTestStatusClass(test)"
-                                 is-open="test.$open"
-                                 is-disabled="test.running"
-                        >
-                    <accordion-heading>
+            </bar>
+        </progress>
+    </div>
+    <div class="row">
+        <accordion close-others="false" class="col-xs-12">
+            <accordion-group
+                    ng-repeat="(key, test) in testCollection | filter:$search"
+                    ng-class="getTestStatusClass(test)"
+                    is-open="test.$open"
+                    is-disabled="test.running"
+                    >
+                <accordion-heading>
                     <span ng-if="!test.running">
                         <i ng-if="test.success" class="fa fa-fw fa-check-square-o text-success"></i>
                         <i ng-if="!test.success" class="fa fa-fw fa-times text-danger"></i>
-                    </span>
-                        <i ng-if="test.running" class="fa fa-fw fa-spinner fa-spin"></i>
-                        {{test.title || 'no test title given'}}
-                    <span ng-if="!test.running">
-                        <button class="btn btn-default btn-sm" ng-click="runTest(test)">
-                            <i class="fa fa-fw fa-play"></i> Run again
+                           <button class="btn btn-default btn-sm" ng-click="runTest($event,test)">
+                               <i class="fa fa-fw fa-play"></i>
+                           </button>
+                        <button class="btn btn-default btn-sm" ng-click="runBenchmark($event,test)">
+                            <i class="fa fa-fw fa-bar-chart"></i>
                         </button>
-                        <i ng-if="test.$open" class="fa fa-fw fa-chevron-down pull-right"></i>
-                        <i ng-if="!test.$open" class="fa fa-fw fa-chevron-right pull-right"></i>
                     </span>
-                    </accordion-heading>
-                    <div class="col-sm-6">
-                        <div  ng-if="test.$testResults">
+                    <i ng-if="test.running" class="fa fa-fw fa-spinner fa-spin"></i>
+                    {{test.title || 'no test title given'}}
+                    <span ng-if="!test.running" class="pull-right">
+                            <span ng-if="test.$duration.list.length>0">
+                                last: {{test.$duration.list[0]}} ms
+                                <span ng-if="test.$duration.list.length> 1">
+                                    (&#x00F8; {{test.$duration.total/test.$duration.list.length | number : 2}} ms)
+                                </span>
+                            </span>
+                        <i ng-if="test.$open" class="fa fa-fw fa-chevron-down"></i>
+                        <i ng-if="!test.$open" class="fa fa-fw fa-chevron-left"></i>
+
+                    </span>
+                </accordion-heading>
+                <div class="col-sm-6">
+                    <div ng-if="test.$testResults">
                         <p>
                             Tests:
                         </p>
+                        <!--<pre>-->
+                        <!--{{-->
+                        <!--test.$duration-->
+                        <!--}}-->
+                        <!--</pre>-->
                         <ul class="fa-ul">
                             <li ng-repeat="(testName,result) in test.$testResults" style="padding-bottom: 5px;">
+
                                 <i ng-if="result.success" class="fa fa-li fa-fw fa-check-square-o text-success"></i>
                                 <i ng-if="!result.success" class="fa fa-li fa-fw fa-times text-danger"></i>
                                 {{testName}}
@@ -143,53 +187,69 @@ tests:
                                 </small>
                             </li>
                         </ul>
-                        </div>
-                        <p>
-                            Config:
-                        </p>
+                    </div>
+                    <p>
+                        Config:
+                    </p>
                          <pre>
                              <b>Endpoint:</b> {{test.config.url}}<br>
                              <b>DefaultGraph:</b> {{test.config.graph}}<br>
                              <b>Timeout:</b> {{test.config.timeout || 5000}}<br>
                          </pre>
-                    </div>
+                    <p>
+                        Execution time:
+                    </p>
+                        <pre ng-class="{'expand': test.$expand.excecutionTime}">
+                        <i class="pull-right fa"
+                           ng-click="test.$expand.query = !test.$expand.excecutionTime" style="white-space: normal"
+                           ng-class="{'fa-plus-square': !test.$expand.excecutionTime, 'fa-minus-square': test.$expand.excecutionTime}"></i>
+<span>{{test.$duration.list | beautifyDurations : test.$duration.max}}</span>
+                        </pre>
 
-                    <div class="col-sm-6">
-                        <p>
-                            Query:
-                        </p>
+                </div>
+
+                <div class="col-sm-6">
+                    <p>
+                        Query:
+                    </p>
                     <pre ng-class="{'expand': test.$expand.query}">
                         <i class="pull-right fa"
                            ng-click="test.$expand.query = !test.$expand.query" style="white-space: normal"
                            ng-class="{'fa-plus-square': !test.$expand.query, 'fa-minus-square': test.$expand.query}"></i>
                         <span>{{test.query}}</span>
                     </pre>
-                        <p>
-                            Results:
-                        </p>
+                    <p>
+                        Results:
+                    </p>
                     <pre ng-class="{'expand': test.$expand.results}">
                         <i class="pull-right fa"
                            ng-click="test.$expand.results = !test.$expand.results"
                            ng-class="{'fa-plus-square': !test.$expand.results, 'fa-minus-square': test.$expand.results}"></i>
                         <span>{{test.$queryResults | replaceURIsWithPrefixes : prefixes}}</span>
                     </pre>
-                    </div>
-                </accordion-group>
-            </accordion>
-        </div>
+                </div>
+            </accordion-group>
+        </accordion>
     </div>
 </div>
-<script src="lodash.build.min.js"></script>
-<script src="bower_components/jquery/jquery.min.js"></script>
+</div>
+<script src="bower_components/lodash/dist/lodash.min.js"></script>
+<script src="bower_components/bluebird/js/browser/bluebird.js"></script>
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="bower_components/moment/min/moment-with-locales.min.js"></script>
 <script src="bower_components/angular/angular.min.js"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
 <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
-<script src="bower_components/underscore.string/dist/underscore.string.min.js"></script>
-<script src="bower_components/jscache/cache.js"></script>
+<!--<script src="bower_components/underscore.string/dist/underscore.string.min.js"></script>-->
+<!--<script src="bower_components/jscache/cache.js"></script>-->
 <script src="bower_components/localforage/dist/localforage.min.js"></script>
 <script src="bower_components/angular-localforage/dist/angular-localForage.min.js"></script>
 <script src="bower_components/jassa/jassa.min.js"></script>
 <script src="bower_components/js-yaml/dist/js-yaml.min.js"></script>
-<script src="app.js"></script>
+
+<script src="src/app.js"></script>
+<script src="src/directives.js"></script>
+<script src="src/filters.js"></script>
+<script src="src/testService.js"></script>
 </body>
 </html>

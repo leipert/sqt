@@ -1,12 +1,12 @@
-.bg-danger > .panel-heading > .panel-title{
+.bg-danger > .panel-heading > .panel-title {
     background: #f2dede;
 }
 
-.bg-info > .panel-heading > .panel-title{
+.bg-info > .panel-heading > .panel-title {
     background: #d9edf7;
 }
 
-.bg-success > .panel-heading > .panel-title{
+.bg-success > .panel-heading > .panel-title {
     background: #dff0d8;
 }
 
@@ -15,11 +15,12 @@
 }
 
 .panel-heading > .panel-title,
-.panel-heading > .panel-title a{
-    width:100%;
-    height:100%;
-    display:block;
+.panel-heading > .panel-title a {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
+
 .panel-heading > .panel-title a {
     padding: 10px 15px;
     line-height: 30px;
@@ -43,6 +44,13 @@ pre i {
 pre.expand {
     max-height: none;
 }
+
 pre span {
     white-space: pre;
+}
+
+.progress-bar[aria-valuenow="0"] {
+    min-width: 0;
+    width: 0;
+    max-width: 0;
 }
