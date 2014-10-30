@@ -1,0 +1,63 @@
+config:
+  url: //ssl.leipert.io/sparql
+  graph: http://gsb.leipert.io/ns/
+  timeout: 5000
+  prefixes:
+    gsb: http://gsb.leipert.io/ns/
+tests:
+- title: isNotEmpty
+  query: |
+     Select ?s {
+       gsb:Agent rdfs:isDefinedBy ?s .
+     } LIMIT 10
+  expect:
+     - isNotEmpty
+- title: isEmpty
+  query: |
+     Select ?s {
+       ?s a dbpedia:nonExistent
+     } LIMIT 10
+  expect:
+     - isEmpty
+- title: contains
+  query: |
+     Select ?s ?p {
+       ?s ?p owl:Ontology
+     } LIMIT 10
+  expect:
+     - contains :
+          s: <http://gsb.leipert.io/ns/>
+- title: containsNot
+  query: |
+     Select ?s ?p ?o {
+       ?s ?p ?o
+     } LIMIT 10
+  expect:
+     - containsNot :
+          o: <http://example.org/nonExistent>
+- title: Query with no tests.
+  query: |
+     Select ?s ?p ?o {
+       ?s ?p ?o
+     } LIMIT 10
+- title: A misformatted SPARQL Query
+  query: |
+     Select ?s {
+       ?s a missing:prefix
+     } LIMIT 10
+  expect:
+     - nonExistentTest: lalalaa
+  config:
+    graph:
+      - http://gsb.leipert.io/ns/
+      - http://dbpedia.org/
+- title: A non existing sparql endpoint
+  query: |
+     Select ?s ?p ?o {
+       ?s ?p ?o
+     } LIMIT 10
+  expect:
+     - isEmpty
+  config:
+     url: //example.org/sparql
+- title:

@@ -1,0 +1,15 @@
+box: olger/box-yeoman
+# Build definition
+build:
+  # The steps that will be executed on build
+  steps:
+    - leipert/yeoman-bower-install
+
+deploy:
+  steps:
+    - script:
+        name: Removing .gitignore
+        code: rm .gitignore
+    - lukevivier/gh-pages:
+        token: $GH_TOKEN
+        basedir: .
