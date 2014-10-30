@@ -123,9 +123,9 @@ tests:
 
     <div>
         <progress animate="false">
-            <bar ng-repeat="(label,bar) in testRatios" value="bar.value" type="{{bar.type}}" animate="false">
+            <bar ng-repeat="bar in testRatios" value="bar.value" type="{{bar.type}}" animate="false">
                     <span ng-hide="bar.value < 5">
-                        <b>{{bar.amount}} of {{totalCount}} tests {{label}} (~{{bar.value | number:0}}%)</b>
+                        <b>{{bar.amount}} of {{totalCount}} tests {{bar.label}} (~{{bar.value | number:0}}%)</b>
                     </span>
             </bar>
         </progress>
@@ -240,8 +240,6 @@ tests:
 <script src="bower_components/angular/angular.min.js"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
 <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
-<!--<script src="bower_components/underscore.string/dist/underscore.string.min.js"></script>-->
-<!--<script src="bower_components/jscache/cache.js"></script>-->
 <script src="bower_components/localforage/dist/localforage.min.js"></script>
 <script src="bower_components/angular-localforage/dist/angular-localForage.min.js"></script>
 <script src="bower_components/jassa/jassa.min.js"></script>

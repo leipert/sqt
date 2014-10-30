@@ -10,6 +10,8 @@ deploy:
     - script:
         name: Removing .gitignore
         code: rm .gitignore
-    - lukevivier/gh-pages:
-        token: $GH_TOKEN
+    - leipert/git-push:
+        gh_token: $GH_TOKEN
+        gh_pages: true
         basedir: .
+        tag: bower
