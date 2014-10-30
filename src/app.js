@@ -205,23 +205,28 @@
                     $localForage.setItem('testCollection', copy);
                     var successCount = _.filter(nv, {running: false, success: true}).length;
                     var failCount = _.filter(nv, {running: false, success: false}).length;
-                    $scope.testRatios = {
-                        running: {
-                            value: Math.floor(runningCount * 100 / $scope.totalCount),
-                            amount: runningCount,
-                            type: 'default'
+                    $scope.testRatios = [
+                        {
+                            label: 'failed',
+                            value: Math.floor(failCount * 100 / $scope.totalCount),
+                            amount: failCount,
+                            type: 'danger'
                         },
-                        successful: {
+                        {
+                            label: 'successful',
                             value: Math.floor(successCount * 100 / $scope.totalCount),
                             amount: successCount,
                             type: 'success'
                         },
-                        failed: {
-                            value: Math.floor(failCount * 100 / $scope.totalCount),
-                            amount: failCount,
-                            type: 'danger'
+                        {
+                            label: 'running',
+                            value: Math.floor(runningCount * 100 / $scope.totalCount),
+                            amount: runningCount,
+                            type: 'default'
                         }
-                    };
+
+
+                    ];
                     var sum = _.reduce(_.pluck($scope.testRatios, 'value'), function (sum, c) {
                         return sum + c
                     });
