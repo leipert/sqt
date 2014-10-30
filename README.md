@@ -1,6 +1,9 @@
 # Sparql-Query-Tester
 
-The Sparql-Query-Tester (or short SQT) is a easy configurable tool which allows the user to run a list of SPARQL Queries on an endpoint (or diffenent ones) and test the results with the Browser.
+The Sparql-Query-Tester (or short SQT) is an easy configurable tool which allows
+users to run a list of SPARQL Queries on an endpoint and test the results within Browsers.
+
+It shows you the results and timings for your tests. You are also able
 
 You are able to test it right now and upload an configuration file here:
 [leipert.github.io/sqt](http://leipert.github.io/sqt)
@@ -8,6 +11,7 @@ You are able to test it right now and upload an configuration file here:
 ## Configuration
 
 The SQT can be easily configured with a yaml file. A valid config contains of two parts; a config object and an array of test objects.
+You can find an working example below or [here](tests.yml).
 
 The config object contains the app defaults (each test can overwrite the default settings)
 - `url`: **String** *mandatory*. Default endpoint URL for all tests.
@@ -62,4 +66,3 @@ tests:
      prefixes:
        foaf: http://xmlns.com/foaf/0.1/
 ```
-You can find another example with failing tests [here](tests.yml)
