@@ -22,11 +22,11 @@
     "vendor"
   ],
   "homepage": "https://github.com/lodash/lodash",
-  "_release": "72270013c8",
+  "_release": "f754654dae",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "72270013c86d6577300178543a457441b6ba086f"
+    "commit": "f754654dae2bb590d65a12e0d1ce1a624793c82e"
   },
   "_source": "git://github.com/lodash/lodash.git",
   "_target": "master",

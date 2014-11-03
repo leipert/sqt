@@ -4,6 +4,8 @@ config:
   timeout: 5000
   prefixes:
     gsb: http://gsb.leipert.io/ns/
+  headers:
+    - Accept: 'application/json, text/javascript, */*; q=0.01'
 tests:
 - title: isNotEmpty
   query: |

@@ -10,19 +10,17 @@
 
     function testService($q) {
         var factory = {};
-        var jassa = new Jassa(Promise, $.ajax);
-        var service = jassa.service;
 
         var testSuite = {
             isEmpty: {
                 test: function (data) {
-                    return _.isEmpty(data)
+                    return _.isEmpty(data);
                 },
                 message: 'Expected result to be empty.'
             },
             isNotEmpty: {
                 test: function (data) {
-                    return !_.isEmpty(data)
+                    return !_.isEmpty(data);
                 },
                 message: 'Expected result not to be empty.'
             },
@@ -56,6 +54,21 @@
             if (!_.isNumber(config.timeout)) {
                 config.timeout = 5000;
             }
+
+            var customAjax = function(cfg) {
+                var newConfig = _.merge(cfg, {
+                    beforeSend: function (xhr) {
+                        angular.forEach(config.headers, function(header) {
+                            var key = Object.keys(header)[0];
+                            var val = header[key];
+                            xhr.setRequestHeader(key, val);
+                        });
+                    },
+                });
+                return $.ajax(newConfig);
+            };
+            var jassa = new Jassa(Promise, customAjax);
+            var service = jassa.service;
             var sparqlService = new service.SparqlServiceHttp(
                 config.url,
                 config.graph
@@ -94,7 +107,7 @@
                     } else {
                         result.$testResults[testName] = {
                             success: false,
-                            message: "A test named " + testName + " does not exist"
+                            message: 'A test named ' + testName + ' does not exist',
                         };
                         result.success = false;
                     }
@@ -119,12 +132,11 @@
 
         };
 
-
         var connectionError = function (data) {
             var responseText = _.isEmpty(data.responseText) ? 'none' : data.responseText;
             var message = 'Could not connect to the sparql endpoint';
             if (data.status !== 0) {
-                message = 'Status: ' + data.status + ' (' + data.statusText + ')'
+                message = 'Status: ' + data.status + ' (' + data.statusText + ')';
             }
             return createErrorMessage('Connection Error', message, responseText);
         };
