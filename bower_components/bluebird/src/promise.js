@@ -125,14 +125,6 @@ function Promise$catch(fn) {
     return this._then(void 0, fn, void 0, void 0, void 0);
 };
 
-function reflect() {
-    return new Promise.PromiseInspection(this);
-}
-
-Promise.prototype.reflect = function Promise$reflect() {
-    return this._then(reflect, reflect, void 0, this, void 0);
-};
-
 Promise.prototype.then =
 function Promise$then(didFulfill, didReject, didProgress) {
     return this._then(didFulfill, didReject, didProgress,
@@ -196,9 +188,7 @@ function Promise$_resolveFromSyncValue(value) {
     if (value === errorObj) {
         this._cleanValues();
         this._setRejected();
-        var reason = value.e;
-        this._settledValue = reason;
-        this._tryAttachExtraTrace(reason);
+        this._settledValue = value.e;
         this._ensurePossibleRejectionHandled();
     } else {
         var maybePromise = cast(value, void 0);
@@ -684,7 +674,6 @@ function Promise$_settlePromiseFromHandler(
         handler.call(receiver, value, promise);
         return;
     }
-    if (promise.isResolved()) return;
     var x = this._callHandler(handler, receiver, promise, value);
     if (promise._isFollowing()) return;
 
@@ -774,13 +763,6 @@ Promise.prototype._setTrace = function Promise$_setTrace(parent) {
         }
     }
     return this;
-};
-
-Promise.prototype._tryAttachExtraTrace =
-function Promise$_tryAttachExtraTrace(error) {
-    if (canAttach(error)) {
-        this._attachExtraTrace(error);
-    }
 };
 
 Promise.prototype._attachExtraTrace =

@@ -11,7 +11,9 @@
     "type": "git",
     "url": "git://github.com/GeoKnow/Jassa-Core.git"
   },
-  "dependencies": {},
+  "dependencies": {
+    "bluebird": "2.3.5"
+  },
   "keywords": [
     "rdf",
     "sparql",
@@ -36,7 +38,7 @@
   "_resolution": {
     "type": "version",
     "tag": "v0.9.0-SNAPSHOT",
-    "commit": "715199b82dfed2a68f84b58e2465ae0e6eb7f6dd"
+    "commit": "37f996622e1bf837a2f75d7785464fb3d6fe2bcd"
   },
   "_source": "git://github.com/GeoKnow/Jassa-Bower.git",
   "_target": "0.9.0-SNAPSHOT",

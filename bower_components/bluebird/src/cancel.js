@@ -16,7 +16,6 @@ Promise.prototype._cancel = function Promise$_cancel(reason) {
         promiseToReject = parent;
     }
     ASSERT(promiseToReject.isCancellable());
-    this._unsetCancellable();
     promiseToReject._attachExtraTrace(reason);
     promiseToReject._rejectUnchecked(reason);
 };

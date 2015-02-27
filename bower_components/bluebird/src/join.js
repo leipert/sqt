@@ -58,9 +58,8 @@ if (canEvaluate) {
     };
 }
 
-function reject(reason) {
-    this._reject(reason);
-}
+
+
 
 Promise.join = function Promise$Join() {
     var last = arguments.length - 1;
@@ -71,6 +70,7 @@ Promise.join = function Promise$Join() {
             var ret = new Promise(INTERNAL);
             ret._setTrace(void 0);
             var holder = new Holder(last, fn);
+            var reject = ret._reject;
             var callbacks = thenCallbacks;
             for (var i = 0; i < last; ++i) {
                 var maybePromise = cast(arguments[i], void 0);
