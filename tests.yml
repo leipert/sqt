@@ -1,16 +1,16 @@
 config:
-  url: //ssl.leipert.io/sparql
-  graph: http://gsb.leipert.io/ns/
+  url: //leipert.io/sparql
+  graph: http://vsb.leipert.io/ns/
   timeout: 5000
   prefixes:
-    gsb: http://gsb.leipert.io/ns/
+    vsb: http://vsb.leipert.io/ns/
   headers:
     - Accept: 'application/json, text/javascript, */*; q=0.01'
 tests:
 - title: isNotEmpty
   query: |
      Select ?s {
-       gsb:Agent rdfs:isDefinedBy ?s .
+       vsb:Agent rdfs:isDefinedBy ?s .
      } LIMIT 10
   expect:
      - isNotEmpty
@@ -28,7 +28,7 @@ tests:
      } LIMIT 10
   expect:
      - contains :
-          s: <http://gsb.leipert.io/ns/>
+          s: <http://vsb.leipert.io/ns/>
 - title: containsNot
   query: |
      Select ?s ?p ?o {
@@ -51,7 +51,7 @@ tests:
      - nonExistentTest: lalalaa
   config:
     graph:
-      - http://gsb.leipert.io/ns/
+      - http://vsb.leipert.io/ns/
       - http://dbpedia.org/
 - title: A non existing sparql endpoint
   query: |
