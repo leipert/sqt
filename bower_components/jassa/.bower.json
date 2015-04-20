@@ -38,7 +38,7 @@
   "_resolution": {
     "type": "version",
     "tag": "v0.9.0-SNAPSHOT",
-    "commit": "37f996622e1bf837a2f75d7785464fb3d6fe2bcd"
+    "commit": "363bacf30f06c94b49acfa3e279bde1b3fc8fe31"
   },
   "_source": "git://github.com/GeoKnow/Jassa-Bower.git",
   "_target": "0.9.0-SNAPSHOT",
